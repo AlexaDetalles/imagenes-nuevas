@@ -2,55 +2,110 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Visor Local de Imágenes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Perfumes | Asset Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); }
+        .img-card:hover img { transform: scale(1.08); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white p-6">
+<body class="bg-[#09090b] text-zinc-400 min-h-screen">
 
-    <div class="max-w-6xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-gray-800 p-6 rounded-xl border border-gray-700">
+    <header class="sticky top-0 z-50 glass border-b border-white/5 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-xl font-bold">📂 Galería Local</h1>
-                <p class="text-gray-400 text-sm">Selecciona la carpeta <b>img</b> para listar todo.</p>
+                <h1 class="text-white text-xl font-extrabold tracking-tighter italic">PERFUME_DB <span class="text-blue-500 text-sm not-italic font-normal ml-2 px-2 py-0.5 bg-blue-500/10 rounded-full border border-blue-500/20" id="counter">0 items</span></h1>
             </div>
-            <input type="file" id="folderInput" webkitdirectory directory multiple 
-                   class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+            
+            <div class="relative w-full md:w-96">
+                <input type="text" id="search" placeholder="Buscar perfume por nombre..." 
+                    class="w-full bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-zinc-600">
+            </div>
         </div>
+    </header>
 
-        <div id="gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-    </div>
+    <main class="max-w-7xl mx-auto p-6 md:p-10">
+        <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
+            </div>
+    </main>
 
     <script>
-        const folderInput = document.getElementById('folderInput');
-        const gallery = document.getElementById('gallery');
+        const nombres = [
+            'adidasamarilla', 'adidasrojo', 'aquafresh', 'arianagrande', 'armafcandy', 
+            'bluebanderas', 'bluenigth', 'cancan', 'charliegold', 'clubdenuit', 
+            'clubdenuitsprye', 'clubdenuitwoman', 'cold', 'cuerpodemujer', 'diselcuyeyo', 
+            'dubai', 'dubainichebubbles', 'dubaiultimo', 'emper', 'galaxyayuda', 
+            'geniusblush', 'glacier', 'guess', 'illusionintense', 'kamra', 'kumar', 
+            'nauticaperronaosiosi', 'rush', 'vainillaazucar', 'victoriasecret', 'yara'
+        ];
 
-        folderInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            gallery.innerHTML = ''; // Limpiar
+        const grid = document.getElementById('grid');
+        const searchInput = document.getElementById('search');
+        const counter = document.getElementById('counter');
 
-            // Filtrar solo imágenes
-            const images = files.filter(file => file.type.startsWith('image/'));
+        function render(filter = '') {
+            grid.innerHTML = '';
+            const filtered = nombres.filter(n => n.toLowerCase().includes(filter.toLowerCase()));
+            counter.innerText = `${filtered.length} items`;
 
-            images.forEach(file => {
-                const url = URL.createObjectURL(file);
+            filtered.forEach(nombre => {
+                const fileName = `${nombre}.png`;
+                const path = `img/${fileName}`;
+
                 const card = document.createElement('div');
-                card.className = "bg-gray-800 p-2 rounded-lg border border-gray-700 hover:border-blue-500 transition cursor-pointer group";
+                card.className = "img-card group cursor-pointer animate-in fade-in duration-500";
                 
-                // Al hacer clic, copia el nombre del archivo para tu Excel
                 card.onclick = () => {
-                    navigator.clipboard.writeText(file.name);
-                    alert('Copiado: ' + file.name);
+                    navigator.clipboard.writeText(path);
+                    showToast(path);
                 };
 
                 card.innerHTML = `
-                    <img src="${url}" class="w-full h-32 object-contain rounded mb-2 bg-gray-900" loading="lazy">
-                    <p class="text-[10px] text-gray-400 truncate text-center group-hover:text-blue-400" title="${file.name}">
-                        ${file.name}
-                    </p>
+                    <div class="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[#111] border border-white/5 flex items-center justify-center transition-all group-hover:border-blue-500/50 group-hover:shadow-[0_0_30px_-10px_rgba(59,130,246,0.3)]">
+                        <img src="${path}" alt="${nombre}" class="w-full h-full object-contain p-4 transition-transform duration-500 ease-out" 
+                             onerror="this.src='https://placehold.co/400x500/111/444?text=Missing'">
+                        
+                        <div class="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors flex items-center justify-center">
+                            <span class="opacity-0 group-hover:opacity-100 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                COPIAR RUTA
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h3 class="text-zinc-200 text-[11px] font-semibold tracking-wide uppercase truncate group-hover:text-blue-400 transition-colors">${nombre}</h3>
+                        <p class="text-zinc-600 text-[10px] font-mono mt-0.5 lowercase italic">${fileName}</p>
+                    </div>
                 `;
-                gallery.appendChild(card);
+                grid.appendChild(card);
             });
-        });
+        }
+
+        function showToast(text) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-8 left-1/2 -translate-x-1/2 glass border border-blue-500/30 text-white px-6 py-3 rounded-2xl text-xs font-bold shadow-2xl z-50 flex items-center gap-3";
+            toast.innerHTML = `
+                <span class="bg-blue-500 rounded-full p-1 italic uppercase text-[8px]">Ok</span>
+                Ruta copiada: <span class="text-blue-400 font-mono">${text}</span>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, 20px)';
+                toast.style.transition = 'all 0.5s';
+                setTimeout(() => toast.remove(), 500);
+            }, 2000);
+        }
+
+        searchInput.addEventListener('input', (e) => render(e.target.value));
+        render(); // Carga inicial
     </script>
 </body>
 </html>
