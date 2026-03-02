@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Visor Local de Imágenes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-6">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-gray-800 p-6 rounded-xl border border-gray-700">
+            <div>
+                <h1 class="text-xl font-bold">📂 Galería Local</h1>
+                <p class="text-gray-400 text-sm">Selecciona la carpeta <b>img</b> para listar todo.</p>
+            </div>
+            <input type="file" id="folderInput" webkitdirectory directory multiple 
+                   class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+        </div>
+
+        <div id="gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+    </div>
+
+    <script>
+        const folderInput = document.getElementById('folderInput');
+        const gallery = document.getElementById('gallery');
+
+        folderInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            gallery.innerHTML = ''; // Limpiar
+
+            // Filtrar solo imágenes
+            const images = files.filter(file => file.type.startsWith('image/'));
+
+            images.forEach(file => {
+                const url = URL.createObjectURL(file);
+                const card = document.createElement('div');
+                card.className = "bg-gray-800 p-2 rounded-lg border border-gray-700 hover:border-blue-500 transition cursor-pointer group";
+                
+                // Al hacer clic, copia el nombre del archivo para tu Excel
+                card.onclick = () => {
+                    navigator.clipboard.writeText(file.name);
+                    alert('Copiado: ' + file.name);
+                };
+
+                card.innerHTML = `
+                    <img src="${url}" class="w-full h-32 object-contain rounded mb-2 bg-gray-900" loading="lazy">
+                    <p class="text-[10px] text-gray-400 truncate text-center group-hover:text-blue-400" title="${file.name}">
+                        ${file.name}
+                    </p>
+                `;
+                gallery.appendChild(card);
+            });
+        });
+    </script>
+</body>
+</html>
